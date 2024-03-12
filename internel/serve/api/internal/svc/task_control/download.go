@@ -130,7 +130,10 @@ func (d *download) getM3u8File(client *http.Client, req *http.Request) ([]*m3u8.
 func (d *download) get(client *http.Client, req *http.Request, write io.Writer) error {
 	d.stop = make(chan struct{})
 	// 构建请求
-	logx.Debug(req.URL.String())
+	logx.Debug(d.t.Name, req.URL.String())
+	//x, _ := json.Marshal(req.Header)
+	//logx.Debug(string(x))
+	req.Header = http.Header{}
 	resp, err := client.Do(req)
 	if resp != nil {
 		defer resp.Body.Close()
@@ -140,7 +143,7 @@ func (d *download) get(client *http.Client, req *http.Request, write io.Writer) 
 	}
 
 	if resp.StatusCode != 200 {
-		return errors.New(fmt.Sprintf("%d %s", resp.StatusCode, resp.Status))
+		return errors.New(fmt.Sprintf("%s", resp.Status))
 	}
 
 	if resp.ContentLength == 0 {

@@ -35,7 +35,7 @@ func (l *RunLogic) Run(req *types.TaskRunRequest) (resp *types.TaskRunResponse, 
 	if len(req.IDS) != 0 {
 		_db = _db.Where("id IN ?", req.IDS)
 	}
-	//_db = _db.Where("status != ?", model.StatusSuccess)
+	_db = _db.Where("status != ?", model.StatusSuccess)
 	_db.Find(&task)
 
 	if len(task) == 0 {

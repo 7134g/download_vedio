@@ -105,6 +105,7 @@ func MatchInformation() {
 					regKey, _ := regexp.Compile(fmt.Sprintf("(%s)|(%s)|(%s)", link, filename, name))
 					if regKey.MatchString(html) {
 						logx.Debugf("taskId %d change name %s", taskId, title)
+						logx.Info("添加任务：", title)
 						if err := taskDB.Update(&model.Task{ID: taskId, Name: title}); err != nil {
 							logx.Error(err)
 						} else {

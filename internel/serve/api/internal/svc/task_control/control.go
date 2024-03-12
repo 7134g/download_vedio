@@ -101,7 +101,7 @@ func (c *TaskControl) submit(fn particleFunc, params []any) {
 			table.IncErrCount(key)
 			if table.GetErrCount(key) >= tcConfig.TaskErrorMaxCount {
 				_ = tasKModel.UpdateStatus(d.t.ID, model.StatusError)
-				logx.Error(d.t.Name, "任务失败")
+				logx.Error(d.t.Name, "任务失败", err)
 			} else {
 				logx.Errorw(
 					"control error message",
