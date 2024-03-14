@@ -11,6 +11,6 @@ build
 url.txt
 
 
-internel/serve/api/internal/util/proxy/mitm.crt
-internel/serve/api/internal/util/proxy/pri.pem
+internel/serve/api/internal/svc/proxy/mitm.crt
+internel/serve/api/internal/svc/proxy/pri.pem
 

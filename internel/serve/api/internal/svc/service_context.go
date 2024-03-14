@@ -4,10 +4,10 @@ import (
 	"dv/internel/serve/api/internal/config"
 	"dv/internel/serve/api/internal/db"
 	"dv/internel/serve/api/internal/middleware"
+	proxy2 "dv/internel/serve/api/internal/svc/proxy"
 	"dv/internel/serve/api/internal/svc/task_control"
 	"dv/internel/serve/api/internal/util/files"
 	"dv/internel/serve/api/internal/util/model"
-	"dv/internel/serve/api/internal/util/proxy"
 	"dv/internel/serve/api/internal/util/ws_conn"
 	"fmt"
 	"github.com/zeromicro/go-zero/core/logx"
@@ -35,17 +35,17 @@ func NewServiceContext(c config.Config) *ServiceContext {
 
 	// 开启被动代理
 	threading.GoSafe(func() {
-		proxy.SetTaskDb(taskModel)
-		proxy.SetServeProxyAddress(c.Proxy, "", "")
-		proxy.OpenCert()
-		proxy.SetMartianAddress(c.WebProxy)
-		if err := proxy.Martian(); err != nil {
+		proxy2.SetTaskDb(taskModel)
+		proxy2.SetServeProxyAddress(c.Proxy, "", "")
+		proxy2.OpenCert()
+		proxy2.SetMartianAddress(c.WebProxy)
+		if err := proxy2.Martian(); err != nil {
 			panic(err)
 		}
 	})
 	// 处理 ProxyCatchUrl 和 ProxyCatchHtml 匹配
 	threading.GoSafe(func() {
-		proxy.MatchInformation()
+		proxy2.MatchInformation()
 	})
 
 	// 设置日志

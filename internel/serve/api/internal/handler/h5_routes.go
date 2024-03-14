@@ -14,12 +14,12 @@ func RegisterH5Handlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			[]rest.Route{
 				{
 					Method:  http.MethodGet,
-					Path:    "/assets/index-03d09010.css",
+					Path:    "/index.css",
 					Handler: h5.Css,
 				},
 				{
 					Method:  http.MethodGet,
-					Path:    "/assets/index-137bce34.js",
+					Path:    "/index.js",
 					Handler: h5.Js,
 				},
 				{

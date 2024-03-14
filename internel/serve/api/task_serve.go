@@ -31,6 +31,7 @@ func main() {
 	handler.RegisterH5Handlers(server, ctx)
 
 	fmt.Printf("Starting server at %s:%d...\n", c.Host, c.Port)
+	fmt.Println("http://localhost:9999/")
 	server.PrintRoutes()
 	server.Start()
 }
