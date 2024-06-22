@@ -2,8 +2,8 @@ package task
 
 import (
 	"context"
-	"dv/internel/serve/api/internal/util/model"
-	"dv/internel/serve/api/internal/util/table"
+	"dv/internel/serve/api/internal/model"
+	"dv/internel/serve/api/internal/svc/dtask"
 	"github.com/jinzhu/copier"
 
 	"dv/internel/serve/api/internal/svc"
@@ -42,19 +42,18 @@ func (l *ListLogic) List(req *types.TaskListRequest) (resp *types.TaskListRespon
 		Total: total,
 		List:  nil,
 	}
-	for _, task := range list {
+	for _, mt := range list {
 		var data types.TaskInfo
-		_ = copier.Copy(&data, &task)
-		if model.StatusSuccess.Eq(task.Status) {
+		_ = copier.Copy(&data, &mt)
+		if model.StatusSuccess == mt.Status {
 			data.Score = 10000
 		} else {
 			// 分子分母
-			molecule, _ := table.DownloadTaskByteLength.Get(task.ID)
-			denominator, _ := table.DownloadTaskMaxLength.Get(task.ID)
-			if denominator == 0 {
+			tLog := dtask.ControlLog.GetTaskLog(mt.ID)
+			if tLog == nil {
 				data.Score = 0
 			} else {
-				data.Score = uint(float64(molecule) / float64(denominator))
+				data.Score = int(tLog.GetLoading())
 			}
 
 		}

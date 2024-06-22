@@ -2,6 +2,7 @@ package task
 
 import (
 	"context"
+	"dv/internel/serve/api/internal/svc/dtask"
 
 	"dv/internel/serve/api/internal/svc"
 	"dv/internel/serve/api/internal/types"
@@ -25,7 +26,7 @@ func NewStatusLogic(ctx context.Context, svcCtx *svc.ServiceContext) *StatusLogi
 
 func (l *StatusLogic) Status(req *types.TaskStatusRequest) (resp *types.TaskStatusResponse, err error) {
 	resp = &types.TaskStatusResponse{
-		Status:   l.svcCtx.TaskControl.GetStatus(),
+		Status:   dtask.Control.CheckStatus(),
 		WebProxy: l.svcCtx.Config.WebProxy,
 	}
 

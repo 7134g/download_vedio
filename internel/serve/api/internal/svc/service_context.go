@@ -2,12 +2,12 @@ package svc
 
 import (
 	"dv/internel/serve/api/internal/config"
+	"dv/internel/serve/api/internal/dao"
 	"dv/internel/serve/api/internal/db"
 	"dv/internel/serve/api/internal/middleware"
-	proxy2 "dv/internel/serve/api/internal/svc/proxy"
-	"dv/internel/serve/api/internal/svc/task_control"
+	"dv/internel/serve/api/internal/svc/dtask"
+	"dv/internel/serve/api/internal/svc/proxy"
 	"dv/internel/serve/api/internal/util/files"
-	"dv/internel/serve/api/internal/util/model"
 	"dv/internel/serve/api/internal/util/ws_conn"
 	"fmt"
 	"github.com/zeromicro/go-zero/core/logx"
@@ -21,8 +21,7 @@ import (
 type ServiceContext struct {
 	Config          config.Config
 	AuthInterceptor rest.Middleware
-	TaskModel       *model.TaskModel
-	TaskControl     *task_control.TaskControl
+	TaskModel       dao.TaskModel
 	LogData         *logCache
 
 	Hub *ws_conn.Hub
@@ -30,22 +29,23 @@ type ServiceContext struct {
 
 func NewServiceContext(c config.Config) *ServiceContext {
 	// db
-	taskModel := model.NewTaskModel(db.InitSqlite(c.DB))
-	task_control.InitTask(c)
+	dao.DaoInit(db.InitSqlite(c.DB))
+	taskModel := dao.TaskDao
+	dtask.Control.Init(c)
 
 	// 开启被动代理
 	threading.GoSafe(func() {
-		proxy2.SetTaskDb(taskModel)
-		proxy2.SetServeProxyAddress(c.Proxy, "", "")
-		proxy2.OpenCert()
-		proxy2.SetMartianAddress(c.WebProxy)
-		if err := proxy2.Martian(); err != nil {
+		proxy.SetTaskDb(taskModel)
+		proxy.SetServeProxyAddress(c.Proxy, "", "")
+		proxy.OpenCert()
+		proxy.SetMartianAddress(c.WebProxy)
+		if err := proxy.Martian(); err != nil {
 			panic(err)
 		}
 	})
 	// 处理 ProxyCatchUrl 和 ProxyCatchHtml 匹配
 	threading.GoSafe(func() {
-		proxy2.MatchInformation()
+		proxy.MatchInformation()
 	})
 
 	// 设置日志
@@ -65,7 +65,6 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		Config:          c,
 		AuthInterceptor: middleware.NewAuthInterceptorMiddleware().Handle,
 		TaskModel:       taskModel,
-		TaskControl:     task_control.NewTaskControl(c.TaskControlConfig.Concurrency),
 		LogData:         logData,
 		Hub:             hub,
 	}

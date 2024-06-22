@@ -1,7 +1,7 @@
 package db
 
 import (
-	"dv/internel/serve/api/internal/util/model"
+	"dv/internel/serve/api/internal/model"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"

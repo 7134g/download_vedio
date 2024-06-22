@@ -2,7 +2,7 @@ package task
 
 import (
 	"context"
-	"dv/internel/serve/api/internal/util/model"
+	"dv/internel/serve/api/internal/model"
 	"github.com/jinzhu/copier"
 
 	"dv/internel/serve/api/internal/svc"
@@ -26,9 +26,9 @@ func NewCreateLogic(ctx context.Context, svcCtx *svc.ServiceContext) *CreateLogi
 }
 
 func (l *CreateLogic) Create(req *types.TaskCreateRequest) (resp *types.TaskCreateResponse, err error) {
-	task := &model.Task{}
+	task := model.Task{}
 	_ = copier.Copy(task, req)
-	err = l.svcCtx.TaskModel.Insert(task)
+	err = l.svcCtx.TaskModel.Create(task)
 
 	return nil, err
 }

@@ -24,11 +24,15 @@ type HttpConfig struct {
 type TaskControlConfig struct {
 	WebProxy string // web监听
 
-	Concurrency       uint   // 并发数
-	ConcurrencyM3u8   uint   // m3u8 片段并发大小
-	SaveDir           string // 存储位置
-	TaskErrorMaxCount uint   // 任务连续最大错误次数
-	TaskErrorDuration uint   // 错误时候休眠多久后重试(秒)
-	UseFfmpeg         bool   // 使用ffmpeg进行合并分片
-	FfmpegPath        string // ffmpeg程序所在地址
+	TaskConcurrency     int32  // 允许任务并发数
+	TaskM3u8Concurrency int32  // m3u8 分片允许的并发数
+	SiteLimit           bool   // 是否开启单站点下载限制
+	TaskErrorMaxCount   int    // 任务连续最大错误次数
+	SaveDir             string // 存储位置
+	TaskErrorDuration   uint   // 错误时候休眠多久后重试(秒)
+	UseFfmpeg           bool   // 使用ffmpeg进行合并分片
+	FfmpegPath          string // ffmpeg程序所在地址
+
+	Concurrency     uint // 并发数
+	ConcurrencyM3u8 uint // m3u8 片段并发大小
 }

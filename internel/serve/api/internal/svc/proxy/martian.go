@@ -2,7 +2,8 @@ package proxy
 
 import (
 	"bytes"
-	"dv/internel/serve/api/internal/util/model"
+	"dv/internel/serve/api/internal/dao"
+	"dv/internel/serve/api/internal/model"
 	"dv/internel/serve/api/internal/util/table"
 	"encoding/base64"
 	"encoding/json"
@@ -25,7 +26,7 @@ import (
 
 var (
 	monitorAddress = "127.0.0.1:10888" // 监听地址
-	taskDB         *model.TaskModel
+	taskDB         dao.TaskModel
 )
 
 var (
@@ -60,7 +61,7 @@ func SetServeProxyAddress(address, username, password string) {
 	serverProxyPassword = password
 }
 
-func SetTaskDb(taskDb *model.TaskModel) {
+func SetTaskDb(taskDb dao.TaskModel) {
 	taskDB = taskDb
 }
 
@@ -144,10 +145,10 @@ func (r *skip) ModifyRequest(req *http.Request) error {
 				Data:       req.URL.String(),
 				HeaderJson: header,
 			}
-			if err := taskDB.Insert(&t); err != nil {
+			if err := taskDB.Create(t); err != nil {
 				logx.Error(err)
 			}
-			table.ProxyCatchUrl.Set(req.URL.String(), t.ID)
+			table.ProxyCatchUrl.Set(req.URL.String(), uint(t.ID))
 		}
 
 	}

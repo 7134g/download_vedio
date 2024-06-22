@@ -2,7 +2,7 @@ package task
 
 import (
 	"context"
-	"dv/internel/serve/api/internal/util/model"
+	"dv/internel/serve/api/internal/model"
 	"github.com/jinzhu/copier"
 
 	"dv/internel/serve/api/internal/svc"
@@ -26,7 +26,7 @@ func NewUpdateLogic(ctx context.Context, svcCtx *svc.ServiceContext) *UpdateLogi
 }
 
 func (l *UpdateLogic) Update(req *types.TaskUpdateRequest) (resp *types.TaskUpdateResponse, err error) {
-	task := &model.Task{}
+	task := model.Task{}
 	_ = copier.Copy(task, req)
 
 	err = l.svcCtx.TaskModel.Update(task)

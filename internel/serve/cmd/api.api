@@ -48,15 +48,6 @@ service task_serve {
 	get /get_file (GetCertRequest) returns (GetCertResponse)
 }
 
-//type Task {
-//	ID        uint   `json:"id"`
-//	Name      string `json:"name"`       // 任务名字
-//	VideoType string `json:"video_type"` // 视频类型
-//	Type      string `json:"type"`       // 任务类型
-//	Data      string `json:"data"`       // url 或者 curl
-//	Status    uint   `json:"status"`     // 执行状态
-//}
-
 type (
 	TaskCreateRequest {
 		Name      string `json:"name"`                          // 任务名字
@@ -70,13 +61,13 @@ type (
 
 type (
 	TaskInfo {
-		ID        uint   `json:"id"`
+		ID        int    `json:"id"`
 		Name      string `json:"name"`       // 任务名字
 		VideoType string `json:"video_type"` // 视频类型
 		Type      string `json:"type"`       // 任务类型
 		Data      string `json:"data"`       // url 或者 curl
-		Status    uint   `json:"status"`     // 执行状态
-		Score     uint   `json:"score"`      // 现在进度
+		Status    int    `json:"status"`     // 执行状态
+		Score     int    `json:"score"`      // 现在进度
 	}
 
 	TaskListRequest {
@@ -90,7 +81,7 @@ type (
 
 type (
 	TaskUpdateRequest {
-		ID        uint   `json:"id"`
+		ID        int    `json:"id"`
 		Name      string `json:"name,optional"`       // 任务名字
 		VideoType string `json:"video_type,optional"` // 视频类型
 		Type      string `json:"type,optional"`       // 任务类型
@@ -102,7 +93,7 @@ type (
 
 type (
 	TaskDeleteRequest {
-		ID uint `json:"id"`
+		ID int `json:"id"`
 	}
 	TaskDeleteResponse {
 	}
@@ -110,8 +101,8 @@ type (
 
 type (
 	TaskRunRequest {
-		IDS  []uint `form:"ids,optional"`
-		Stop bool   `form:"stop,optional"`
+		IDS  []int `form:"ids,optional"`
+		Stop bool  `form:"stop,optional"`
 	}
 	TaskRunResponse {
 		Message string `json:"message"`

@@ -12,13 +12,13 @@ type TaskCreateResponse struct {
 }
 
 type TaskInfo struct {
-	ID        uint   `json:"id"`
+	ID        int    `json:"id"`
 	Name      string `json:"name"`       // 任务名字
 	VideoType string `json:"video_type"` // 视频类型
 	Type      string `json:"type"`       // 任务类型
 	Data      string `json:"data"`       // url 或者 curl
-	Status    uint   `json:"status"`     // 执行状态
-	Score     uint   `json:"score"`      // 现在进度
+	Status    int    `json:"status"`     // 执行状态
+	Score     int    `json:"score"`      // 现在进度
 }
 
 type TaskListRequest struct {
@@ -31,7 +31,7 @@ type TaskListResponse struct {
 }
 
 type TaskUpdateRequest struct {
-	ID        uint   `json:"id"`
+	ID        int    `json:"id"`
 	Name      string `json:"name,optional"`       // 任务名字
 	VideoType string `json:"video_type,optional"` // 视频类型
 	Type      string `json:"type,optional"`       // 任务类型
@@ -42,15 +42,15 @@ type TaskUpdateResponse struct {
 }
 
 type TaskDeleteRequest struct {
-	ID uint `json:"id"`
+	ID int `json:"id"`
 }
 
 type TaskDeleteResponse struct {
 }
 
 type TaskRunRequest struct {
-	IDS  []uint `form:"ids,optional"`
-	Stop bool   `form:"stop,optional"`
+	IDS  []int `form:"ids,optional"`
+	Stop bool  `form:"stop,optional"`
 }
 
 type TaskRunResponse struct {
