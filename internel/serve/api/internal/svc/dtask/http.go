@@ -55,13 +55,13 @@ func parseTaskToHttp(t model.Task) (*http.Request, error) {
 	var err error
 	switch t.Type {
 	case model.TypeUrl:
-		request, err = http.NewRequest(http.MethodGet, t.Data, nil)
+		request, err = http.NewRequest(http.MethodGet, t.Url, nil)
 		if err != nil {
 			return nil, err
 		}
 		request.Header = defaultHeader
 	case model.TypeCurl:
-		_url, header, err := curl.Parse(t.Data)
+		_url, header, err := curl.Parse(t.Url)
 		if err != nil {
 			return nil, err
 		}
@@ -71,7 +71,7 @@ func parseTaskToHttp(t model.Task) (*http.Request, error) {
 		}
 		request.Header = header
 	case model.TypeProxy:
-		request, err = http.NewRequest(http.MethodGet, t.Data, nil)
+		request, err = http.NewRequest(http.MethodGet, t.Url, nil)
 		if err != nil {
 			return nil, err
 		}

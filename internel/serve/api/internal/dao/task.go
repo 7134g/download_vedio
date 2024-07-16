@@ -12,8 +12,8 @@ var TaskDao TaskModel
 type TaskModel struct {
 }
 
-func (t *TaskModel) Create(d model.Task) error {
-	return db.Model(&model.Task{}).Create(&d).Error
+func (t *TaskModel) Create(d *model.Task) error {
+	return db.Model(&model.Task{}).Create(d).Error
 }
 
 func (t *TaskModel) Delete(id int) error {
@@ -42,9 +42,9 @@ func (t *TaskModel) Find(ids []int) ([]model.Task, error) {
 	return data, nil
 }
 
-func (t *TaskModel) Exist(data string) (*model.Task, error) {
+func (t *TaskModel) Exist(url string) (*model.Task, error) {
 	findTask := &model.Task{}
-	if err := db.Model(&model.Task{}).Where("data = ?", data).First(findTask).Error; err != nil {
+	if err := db.Model(&model.Task{}).Where("data = ?", url).First(findTask).Error; err != nil {
 		return nil, err
 	}
 

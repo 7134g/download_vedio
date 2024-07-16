@@ -28,7 +28,7 @@ func NewCreateLogic(ctx context.Context, svcCtx *svc.ServiceContext) *CreateLogi
 func (l *CreateLogic) Create(req *types.TaskCreateRequest) (resp *types.TaskCreateResponse, err error) {
 	task := model.Task{}
 	_ = copier.Copy(task, req)
-	err = l.svcCtx.TaskModel.Create(task)
+	err = l.svcCtx.TaskModel.Create(&task)
 
 	return nil, err
 }

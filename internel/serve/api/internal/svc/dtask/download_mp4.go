@@ -3,7 +3,7 @@ package dtask
 import (
 	"dv/internel/serve/api/internal/config"
 	"dv/internel/serve/api/internal/model"
-	"dv/internel/serve/api/internal/task/pool"
+	"dv/internel/serve/api/internal/svc/dtask/pool"
 	"os"
 	"path/filepath"
 )

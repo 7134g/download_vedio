@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"dv/internel/serve/api/internal/dao"
 	"dv/internel/serve/api/internal/model"
-	"dv/internel/serve/api/internal/util/table"
 	"encoding/base64"
 	"encoding/json"
 	"errors"
@@ -88,7 +87,7 @@ func Martian() error {
 	}
 
 	group := priority.NewGroup()
-	xs := newSkip()
+	xs := newFirstCheckpoint()
 	group.AddRequestModifier(xs, 10)
 	group.AddResponseModifier(xs, 10)
 	xa := newAuth(proxyauth.NewModifier())
@@ -111,68 +110,70 @@ func Martian() error {
 	return nil
 }
 
-type skip struct {
+type firstCheckpoint struct {
 }
 
-func newSkip() *skip {
-	return &skip{}
+func newFirstCheckpoint() *firstCheckpoint {
+	return &firstCheckpoint{}
 }
 
-func (r *skip) ModifyRequest(req *http.Request) error {
+func (r *firstCheckpoint) ModifyRequest(req *http.Request) error {
 	logx.Debugw(
 		"url message",
 		logx.Field("method", req.Method),
 		logx.Field("url", req.URL.String()))
 	req.Header.Del("Accept-Encoding")
-	parts := strings.Split(req.URL.Path, ".")
+	HostUrlMap.AddReqUrl(req.URL.String())
+	return nil
+}
+
+func (r *firstCheckpoint) ModifyResponse(res *http.Response) error {
+	reqUrl := res.Request.URL.String()
+	HostUrlMap.AddReqUrl(reqUrl)
+
+	parts := strings.Split(res.Request.URL.Path, ".")
 	if len(parts) > 0 {
-		var header string
 		ext := parts[len(parts)-1]
 		switch ext {
 		case model.VideoTypeMp4, model.VideoTypeM3u8:
-			v, _ := json.Marshal(req.Header)
-			header = string(v)
+			v, _ := json.Marshal(res.Request.Header)
+			header := string(v)
+			findTask, _ := taskDB.Exist(reqUrl)
+			if findTask == nil {
+				t := &model.Task{
+					Name:       fmt.Sprintf("%s", time.Now().Format("2006_01_02_15_04_05")),
+					VideoType:  ext,
+					Type:       model.TypeProxy,
+					Url:        reqUrl,
+					HeaderJson: header,
+				}
+				if err := taskDB.Create(t); err != nil {
+					logx.Error(err)
+				}
+
+				t, _ = taskDB.Exist(reqUrl)
+				sourceChan <- message{
+					taskId: t.ID,
+					source: t.Url,
+				}
+			}
+		case "html":
+			data, err := io.ReadAll(res.Body)
+			if err != nil {
+				return err
+			}
+			if len(data) == 0 {
+				return nil
+			}
+
+			HostUrlMap.AddBody(reqUrl, data)
+			res.Body = io.NopCloser(bytes.NewBuffer(data))
 		default:
 			return nil
 		}
 
-		findTask, _ := taskDB.Exist(req.URL.String())
-		if findTask == nil {
-			t := model.Task{
-				Name:       fmt.Sprintf("%s", time.Now().Format("2006_01_02_15_04_05")),
-				VideoType:  ext,
-				Type:       model.TypeProxy,
-				Data:       req.URL.String(),
-				HeaderJson: header,
-			}
-			if err := taskDB.Create(t); err != nil {
-				logx.Error(err)
-			}
-			table.ProxyCatchUrl.Set(req.URL.String(), uint(t.ID))
-		}
-
 	}
 
-	return nil
-}
-
-func (r *skip) ModifyResponse(res *http.Response) error {
-	if !strings.HasSuffix(res.Request.URL.String(), ".html") {
-		return nil
-	}
-	data, err := io.ReadAll(res.Body)
-	if err != nil {
-		return err
-	}
-	if len(data) == 0 {
-		return nil
-	}
-
-	if title, _ := ParseHtmlTitle(bytes.NewBuffer(data)); title != "" {
-		table.ProxyCatchHtmlTitle.Set(title, bytes.NewBuffer(data).String())
-	}
-
-	res.Body = io.NopCloser(bytes.NewBuffer(data))
 	return nil
 }
 
@@ -216,13 +217,4 @@ func (r *xauth) ModifyResponse(res *http.Response) error {
 func getNumber() int64 {
 	currentTime := time.Now().Unix()
 	return currentTime - currentTime%10
-}
-
-func getUrlHost(u string) (string, error) {
-	_url, err := url.Parse(u)
-	if err != nil {
-		return "", err
-	}
-
-	return _url.Host, nil
 }

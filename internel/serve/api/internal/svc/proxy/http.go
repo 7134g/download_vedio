@@ -2,17 +2,13 @@ package proxy
 
 import (
 	"bytes"
-	"dv/internel/serve/api/internal/util/model"
-	"dv/internel/serve/api/internal/util/table"
+	"dv/internel/serve/api/internal/model"
 	"errors"
-	"fmt"
 	"github.com/PuerkitoBio/goquery"
 	"github.com/zeromicro/go-zero/core/logx"
 	"io"
 	"net/http"
-	"net/url"
 	"regexp"
-	"strings"
 	"time"
 )
 
@@ -76,52 +72,47 @@ func ExtractRequestToString(res *http.Request) string {
 
 var (
 	regUrl, _  = regexp.Compile(`([^\/]+)(\.m3u8|\.mp4)$`)
-	tickerTime = time.Second * 10
+	tickerTime = time.Second
+	sourceChan = make(chan message, 1000)
 )
 
+type message struct {
+	taskId int
+	source string
+
+	sleep time.Duration
+}
+
 func MatchInformation() {
-	ticker := time.NewTicker(tickerTime)
 
 	for {
-
-		deleteKey := []string{}
-
 		select {
-		case <-ticker.C:
-			table.ProxyCatchUrl.Each(func(link string, taskId uint) {
-				// https://1257120875.vod2.myqcloud.com/0ef121cdvodtransgzp1257120875/3055695e5285890780828799271/v.f230.m3u8
-				u, err := url.Parse(link)
+		case msg := <-sourceChan:
+			if msg.sleep > 0 {
+				time.Sleep(msg.sleep)
+			}
+
+			items := HostUrlMap.Find(msg)
+			var title string
+			for _, body := range items {
+				keyword, err := ParseHtmlTitle(bytes.NewBuffer(body))
+				if err == nil && len(keyword) > 0 {
+					title = keyword
+					break
+				}
 				if err != nil {
-					return
-				}
-				var filename, name string
-				filename = regUrl.FindString(u.Path)
-				parts := strings.Split(filename, ".")
-				if len(parts) > 1 {
-					name = parts[0]
+					logx.Error(err)
 				}
 
-				table.ProxyCatchHtmlTitle.Each(func(title string, html string) {
-					regKey, _ := regexp.Compile(fmt.Sprintf("(%s)|(%s)|(%s)", link, filename, name))
-					if regKey.MatchString(html) {
-						logx.Debugf("taskId %d change name %s", taskId, title)
-						logx.Info("添加任务：", title)
-						if err := taskDB.Update(&model.Task{ID: taskId, Name: title}); err != nil {
-							logx.Error(err)
-						} else {
-							deleteKey = append(deleteKey, title, link)
-						}
-					}
+			}
 
-				})
-			})
-
+			if len(title) == 0 {
+				continue
+			}
+			if err := taskDB.Update(model.Task{ID: msg.taskId, Name: title}); err != nil {
+				logx.Error(err)
+				continue
+			}
 		}
-
-		for _, k := range deleteKey {
-			table.ProxyCatchUrl.Del(k)
-			table.ProxyCatchHtmlTitle.Del(k)
-		}
-
 	}
 }
